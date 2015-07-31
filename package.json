@@ -1,0 +1,27 @@
+{
+  "name": "my-stay",
+  "version": "1.0.0",
+  "description": "A WebApp which helps travellers interactively like, save and share hotels online.",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sunilkumarc/my-stay.git"
+  },
+  "author": "Sunil Kumar C",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/sunilkumarc/my-stay/issues"
+  },
+  "homepage": "https://github.com/sunilkumarc/my-stay#readme",
+  "dependencies": {
+    "body-parser": "^1.13.2",
+    "cors": "^2.7.1",
+    "express": "^4.13.1",
+    "mongodb-uri": "^0.9.7",
+    "mongoose": "^4.1.0"
+  }
+}
