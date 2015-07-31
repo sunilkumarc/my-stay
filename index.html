@@ -19,7 +19,94 @@
     <script src="http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.4.2/underscore-min.js" type="text/javascript"></script>
     <script src="http://cdnjs.cloudflare.com/ajax/libs/backbone.js/0.9.2/backbone-min.js"></script>
 
+    <!-- View to add a new recruiter -->
+    <script type="text/template" id="hotel-names">
+        <h3>Hotels</h3>
+        <% _.each(hotels, function(hotel) { %>
+            <button class="btn btn-primary load-summary" data-hotel="<%= hotel.get('_id')%>">
+                <%= htmlEncode(hotel.get('name')) %>
+            </button>
+        <% }); %>
+    </script>
+
     <script>
+        $.ajaxPrefilter( function( options, originalOptions, jqXHR ) {
+            options.url = 'http://192.168.1.123:8000' + options.url;
+        });
+        function htmlEncode(value){
+          return $('<div/>').text(value).html();
+        }
+        $.fn.serializeObject = function() {
+          var o = {};
+          var a = this.serializeArray();
+          $.each(a, function() {
+              if (o[this.name] !== undefined) {
+                  if (!o[this.name].push) {
+                      o[this.name] = [o[this.name]];
+                  }
+                  o[this.name].push(this.value || '');
+              } else {
+                  o[this.name] = this.value || '';
+              }
+          });
+          return o;
+        };
+
+        ////////////// Collections //////////////////////
+
+        var HotelNames = Backbone.Collection.extend({
+            url: '/hotels/names'
+        });
+
+        ////////////// Views ////////////////////////////
+        var HotelNamesView = Backbone.View.extend({
+            el: '.hotels',
+
+            events: {
+                'click .load-summary': 'loadSummary'
+            },
+
+            loadSummary: function(ev) {
+                var hotel_id = $(ev.currentTarget).data('hotel');
+                hotelSummaryView.render(hotel_id);
+            },
+
+            render: function() {
+                var that = this;
+                var hotels = new HotelNames();
+                hotels.fetch({
+                    success: function(hotels) {
+                        var template = _.template($('#hotel-names').html(), {hotels: hotels.models});
+                        that.$el.html(template);
+                    }
+                });
+            }
+
+        });
+        var hotelNamesView = new HotelNamesView();
+
+        var HotelSummaryView = Backbone.View.extend({
+            el: '.summary',
+
+            render: function(hotel_id) {
+                
+            }
+        });
+        var hotelSummaryView = new HotelSummaryView();
+
+        /////////////// Router ///////////////////////////
+        var Router = Backbone.Router.extend({
+            routes: {
+                "": "home"
+            }
+        });
+        var router = new Router;
+
+        router.on('route:home', function() {
+            hotelNamesView.render();
+        });
+
+        Backbone.history.start();
     </script>
 </body>
 </html>

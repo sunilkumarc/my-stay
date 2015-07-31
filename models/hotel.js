@@ -22,10 +22,12 @@ var Schema = mongoose.Schema;
      barTimings: {
          from: String,
          to: String
-     }
+     },
      airConditioner: Boolean,
      gym: Boolean,
-     pool: Boolean
+     pool: Boolean,
+     imgLink: String,
+     manualLink: String,
  });
 
 module.exports = mongoose.model('hotel', hotelSchema);
