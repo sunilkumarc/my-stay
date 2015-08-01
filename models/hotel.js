@@ -18,7 +18,7 @@ var Schema = mongoose.Schema;
      executiveRoom: Number,
      conservatoryRoom: Number,
      juniorSuiteSuiteDreams: Number,
-     distanceFromAirport: Number,
+     distanceFromAirport: String,
      barTimings: {
          from: String,
          to: String

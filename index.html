@@ -9,7 +9,7 @@
 
     <!-- Container where the different pages will be loaded -->
     <div class="container">
-        <h2>myStay — simplified hotel browsing!</h2>
+        <h1>myStay — simplified hotel browsing!</h1>
         <hr/>
         <div class="summary"></div>
         <div class="hotels"></div>
@@ -21,7 +21,7 @@
 
     <!-- View to add a new recruiter -->
     <script type="text/template" id="hotel-names">
-        <h3>Hotels</h3>
+
         <% _.each(hotels, function(hotel) { %>
             <button class="btn btn-primary load-summary" data-hotel="<%= hotel.get('_id')%>">
                 <%= htmlEncode(hotel.get('name')) %>
@@ -29,9 +29,109 @@
         <% }); %>
     </script>
 
+    <script type="text/template" id="hotel-summary">
+        <div class="well">
+
+            <div class="row-fluid">
+              <div class="span4"><img src="<%= hotel.get('imgLink')%>"></img></div>
+              <div class="span4">
+                  <h3><%= htmlEncode(hotel.get('name')) %></h3>
+                  <h5>Rating : <%= htmlEncode(hotel.get('rating')) %></h5>
+                  <h5>Likes : <%= htmlEncode(hotel.get('likes')) %></h5>
+              </div>
+              <div class="span4">
+                  <table class="table">
+                      <tbody>
+                        <tr>
+                            <th><i class="icon-map-marker"></i> Location</th>
+                            <td><%= htmlEncode(hotel.get('location')) %></td>
+                        </tr>
+                        <tr>
+                            <th><i class="icon-time"></i> Checkin hours</th>
+                            <td><%= htmlEncode(hotel.get('checkIn')['from']) %> - <%= htmlEncode(hotel.get('checkIn')['to']) %></td>
+                        </tr>
+                        <tr>
+                            <th><i class="icon-signal"></i> Wifi</th>
+                            <td><%= hotel.get('wifi') ? "Available" : "Not Available" %></td>
+                        </tr>
+                        <tr>
+                            <th><i class="icon-folder-open"></i> Credit Card</th>
+                            <td><%= hotel.get('creditCard') ? "Acceptable" : "Not Acceptable" %></td>
+                        </tr>
+                        <tr>
+                            <th><i class="icon-briefcase"></i> Cash</th>
+                            <td><%= hotel.get('cash') ? "Acceptable" : "Not Acceptable" %></td>
+                        </tr>
+                      </tbody>
+                  </table>
+              </div>
+            </div>
+            <hr/>
+
+            <div class="row-fluid">
+              <div class="span12" style="background: #fff; padding: 10px; margin-bottom: 10px">
+                  <h5><%= htmlEncode(hotel.get('description')) %></h5>
+              </div>
+            </div>
+
+            <div class="row-fluid">
+              <div class="span6">
+                  <table class="table table-bordered">
+                      <tbody>
+                          <tr>
+                              <th>Deluxe Room</th>
+                              <td><%= htmlEncode(hotel.get('deluxeRoom')) %></td>
+                          </tr>
+                          <tr>
+                              <th>Executive Room</th>
+                              <td><%= htmlEncode(hotel.get('executiveRoom')) %></td>
+                          </tr>
+                          <tr>
+                              <th>Conservator Room</th>
+                              <td><%= htmlEncode(hotel.get('conservatoryRoom')) %></td>
+                          </tr>
+                          <tr>
+                              <th>Junior Suite - Suite Dreams</th>
+                              <td><%= htmlEncode(hotel.get('juniorSuiteSuiteDreams')) %></td>
+                          </tr>
+                          <tr>
+                              <th>Distanc From Airport</th>
+                              <td><%= htmlEncode(hotel.get('distanceFromAirport')) %></td>
+                          </tr>
+                      </tbody>
+                  </table>
+              </div>
+              <div class="span6">
+
+                  <table class="table table-bordered">
+                      <tbody>
+                          <tr>
+                              <th>Bar</th>
+                              <td><%= htmlEncode(hotel.get('barTimings')['from']) %> - <%= htmlEncode(hotel.get('barTimings')['to']) %></td>
+                          </tr>
+                          <tr>
+                              <th>Air Conditioner</th>
+                              <td><%= hotel.get('airConditioner') ? "Yes" : "No" %></td>
+                          </tr>
+                          <tr>
+                              <th>Gym</th>
+                              <td><%= hotel.get('gym') ? "Yes" : "No" %></td>
+                          </tr>
+                          <tr>
+                              <th>Pool</th>
+                              <td><%= hotel.get('pool') ? "Yes" : "No" %></td>
+                          </tr>
+                      </tbody>
+                  </table>
+              </div>
+            </div>
+            <i class="icon-download-alt"></i> <a href="<%= hotel.get('manualLink')%>">Download Manual</a>
+        </div>
+    </script>
+
     <script>
         $.ajaxPrefilter( function( options, originalOptions, jqXHR ) {
-            options.url = 'http://192.168.1.123:8000' + options.url;
+            options.url = 'http://localhost:8000' + options.url;
         });
         function htmlEncode(value){
           return $('<div/>').text(value).html();
@@ -51,6 +151,12 @@
           });
           return o;
         };
+
+
+        /////////////// Models /////////////////////////
+        var Hotel = Backbone.Model.extend({
+            urlRoot: '/hotels'
+        });
 
         ////////////// Collections //////////////////////
 
@@ -89,7 +195,15 @@
             el: '.summary',
 
             render: function(hotel_id) {
-                
+                var that = this;
+                var hotel = new Hotel({id: hotel_id});
+                hotel.fetch({
+                    success: function(hotel) {
+                        console.log(hotel);
+                        var template = _.template($('#hotel-summary').html(), {hotel: hotel});
+                        that.$el.html(template);
+                    }
+                });
             }
         });
         var hotelSummaryView = new HotelSummaryView();
