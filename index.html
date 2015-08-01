@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Recruiter Application</title>
+    <title>Hotel Browsing</title>
     <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.1.1/css/bootstrap.min.css">
 </head>
 <body>
@@ -11,6 +11,9 @@
     <div class="container">
         <h1>myStay — simplified hotel browsing!</h1>
         <hr/>
+        <h4 class="hotels-count"></h4>
+        <h4 class="api-hits">Hits : 89</h4>
+        <br/>
         <div class="summary"></div>
         <div class="hotels"></div>
     </div>
@@ -37,7 +40,9 @@
               <div class="span4">
                   <h3><%= htmlEncode(hotel.get('name')) %></h3>
                   <h5>Rating : <%= htmlEncode(hotel.get('rating')) %></h5>
-                  <h5>Likes : <%= htmlEncode(hotel.get('likes')) %></h5>
+                  <h5>Likes : <%= htmlEncode(hotel.get('likes')) %>
+                      <button class="btn btn-primary like-hotel" data-hotel="<%= hotel.get('_id')%>">Like</button>
+                  </h5>
               </div>
               <div class="span4">
                   <table class="table">
@@ -158,6 +163,14 @@
             urlRoot: '/hotels'
         });
 
+        var HotelsCount = Backbone.Model.extend({
+            urlRoot: '/hotelsCount'
+        });
+
+        var APIHits = Backbone.Model.extend({
+            urlRoot: '/apihits'
+        });
+
         ////////////// Collections //////////////////////
 
         var HotelNames = Backbone.Collection.extend({
@@ -182,8 +195,14 @@
                 var hotels = new HotelNames();
                 hotels.fetch({
                     success: function(hotels) {
-                        var template = _.template($('#hotel-names').html(), {hotels: hotels.models});
-                        that.$el.html(template);
+                        $(".hotels-count").html("Hotels Count : " + hotels.length);
+                        if (hotels.length > 0) {
+                            var template = _.template($('#hotel-names').html(), {hotels: hotels.models});
+                            that.$el.html(template);
+                            hotelSummaryView.render(hotels.models[0].get('_id'));
+                        } else {
+                            that.$el.html("No hotels!")
+                        }
                     }
                 });
             }
@@ -194,12 +213,32 @@
         var HotelSummaryView = Backbone.View.extend({
             el: '.summary',
 
+            events: {
+                'click .like-hotel': 'likeHotel'
+            },
+
+            likeHotel: function(ev) {
+                var hotel_id = $(ev.currentTarget).data('hotel');
+                var that = this;
+                var hotel = new Hotel({id: hotel_id});
+                hotel.fetch({
+                    success: function(hotel) {
+                        hotel.set('likes', hotel.get('likes') + 1);
+                        var updatedHotel = new Hotel();
+                        updatedHotel.save(hotel, {
+                            success: function(updatedHotel) {
+                                that.render(hotel.get('_id'));
+                            }
+                        });
+                    }
+                });
+            },
+
             render: function(hotel_id) {
                 var that = this;
                 var hotel = new Hotel({id: hotel_id});
                 hotel.fetch({
                     success: function(hotel) {
-                        console.log(hotel);
                         var template = _.template($('#hotel-summary').html(), {hotel: hotel});
                         that.$el.html(template);
                     }
@@ -207,6 +246,23 @@
             }
         });
         var hotelSummaryView = new HotelSummaryView();
+
+        var APIHitsView = Backbone.View.extend({
+            el: '.api-hits',
+
+            render: function() {
+                // this.$el.html("Here");
+                var that = this;
+                var apihits = new APIHits();
+                console.log("Inside Success");
+                apihits.fetch({
+                    success: function(hits) {
+                        that.$el.html(hits);
+                    }
+                });
+            }
+        });
+        var apiHitsView = new APIHitsView();
 
         /////////////// Router ///////////////////////////
         var Router = Backbone.Router.extend({
@@ -217,6 +273,7 @@
         var router = new Router;
 
         router.on('route:home', function() {
+            apiHitsView.render();
             hotelNamesView.render();
         });
 
