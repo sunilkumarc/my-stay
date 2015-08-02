@@ -1,3 +1,4 @@
 node_modules/
 mongo-database/
 app-screenshots/
+npm-debug.log

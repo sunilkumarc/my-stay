@@ -6,8 +6,6 @@ var Hotel = require('./models/hotel');
 
 var server = express();
 
-var api_hits = 0;
-
 // Middleware
 server.use(bodyParser.json());
 server.use(cors());
@@ -22,12 +20,10 @@ mongoose.connect(db_url, function(err, conn) {
 });
 
 server.get('/', function(req, res){
-    api_hits += 1;
     res.status(200).send("Server Working Fine :D");
 });
 
 server.get('/hotels/names', function(req, res) {
-    api_hits += 1;
     Hotel.find().select('name').exec(function(err, hotels) {
         if(hotels) {
             res.send(hotels);
@@ -38,7 +34,6 @@ server.get('/hotels/names', function(req, res) {
 });
 
 server.get('/hotels/:id', function(req, res) {
-    api_hits += 1;
     var hotel_id = req.params.id;
 
     Hotel.findOne({_id: hotel_id}).exec(function(err, hotel) {
@@ -51,7 +46,6 @@ server.get('/hotels/:id', function(req, res) {
 });
 
 server.put('/hotels/:id', function(req, res) {
-    api_hits += 1;
     var hotel_id = req.params.id;
 
     Hotel.findOne({_id: hotel_id}).exec(function(err, hotel) {
@@ -71,11 +65,6 @@ server.put('/hotels/:id', function(req, res) {
             res.status(500).send("Something went wrong");
         }
     })
-});
-
-server.get('/apihits', function(req, res) {
-    api_hits += 1;
-    res.sendStatus("Hits : " + api_hits);
 });
 
 var port = Number(process.env.PORT || 8000)

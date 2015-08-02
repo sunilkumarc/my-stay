@@ -12,7 +12,6 @@
         <h1>myStay — simplified hotel browsing!</h1>
         <hr/>
         <h4 class="hotels-count"></h4>
-        <h4 class="api-hits">Hits : 89</h4>
         <br/>
         <div class="summary"></div>
         <div class="hotels"></div>
@@ -167,10 +166,6 @@
             urlRoot: '/hotelsCount'
         });
 
-        var APIHits = Backbone.Model.extend({
-            urlRoot: '/apihits'
-        });
-
         ////////////// Collections //////////////////////
 
         var HotelNames = Backbone.Collection.extend({
@@ -213,11 +208,16 @@
         var HotelSummaryView = Backbone.View.extend({
             el: '.summary',
 
+            initialize: function() {
+                this.liked = false;
+            },
+
             events: {
                 'click .like-hotel': 'likeHotel'
             },
 
             likeHotel: function(ev) {
+                this.liked = true;
                 var hotel_id = $(ev.currentTarget).data('hotel');
                 var that = this;
                 var hotel = new Hotel({id: hotel_id});
@@ -237,32 +237,19 @@
             render: function(hotel_id) {
                 var that = this;
                 var hotel = new Hotel({id: hotel_id});
+
                 hotel.fetch({
                     success: function(hotel) {
                         var template = _.template($('#hotel-summary').html(), {hotel: hotel});
                         that.$el.html(template);
                     }
                 });
+
+                if(this.liked)
+                    $('.like-hotel').addClass('btn-disabled');
             }
         });
         var hotelSummaryView = new HotelSummaryView();
-
-        var APIHitsView = Backbone.View.extend({
-            el: '.api-hits',
-
-            render: function() {
-                // this.$el.html("Here");
-                var that = this;
-                var apihits = new APIHits();
-                console.log("Inside Success");
-                apihits.fetch({
-                    success: function(hits) {
-                        that.$el.html(hits);
-                    }
-                });
-            }
-        });
-        var apiHitsView = new APIHitsView();
 
         /////////////// Router ///////////////////////////
         var Router = Backbone.Router.extend({
@@ -273,7 +260,6 @@
         var router = new Router;
 
         router.on('route:home', function() {
-            apiHitsView.render();
             hotelNamesView.render();
         });
 
